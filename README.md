@@ -23,10 +23,10 @@ class real_db:
     return requests.post(self.connect,json={"pswd":self.key,"mod":"get","row":row,"key":key})
   # set the data in row/key to data, returns this https://requests.readthedocs.io/en/latest/user/quickstart/#response-content
   def set(self,row,key,data):
-    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","row":row,"key":key,"data":data})
+    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","row":row,"key":key,"dat":data})
   # uses the "default" row to make a new row with name as data
   def new(self,data):
-    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","data":data})```
+    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","dat":data})```
     
 Its dead simple, the server itself consists of ``POST`` requests to a server, with the modifier "get" "set" or "new"
 
