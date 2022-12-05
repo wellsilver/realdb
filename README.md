@@ -26,7 +26,9 @@ class real_db:
     return requests.post(self.connect,json={"pswd":self.key,"mod":"set","row":row,"key":key,"dat":data})
   # uses the "default" row to make a new row with name as data
   def new(self,data):
-    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","dat":data})```
+    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","dat":data})
+    
+```
     
 Its dead simple, the server itself consists of ``POST`` requests to a server, with the modifier "get" "set" or "new"
 
