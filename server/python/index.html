@@ -1,0 +1,50 @@
+<p>This is a RealDB server</p>
+
+<p>todo: web access to db</p>
+<p>btw below doesnt work yet</p>
+<div style="border: 2px solid black">
+<center>
+<form>
+  <label for="pswd">key (database password, modify in keys.txt):</label><br>
+  <input type="text" id="pswd" name="pswd"><br><p></p>
+  <label for="mod">mod:</label>
+  <select name="mod" id="mod">
+    <option value="get">get</option>
+    <option value="set">set</option>
+    <option value="new">new</option>
+  </select>
+  <p></p>
+  <label for="row">Row to access:</label><br>
+  <input type="text" id="row" name="row"><br><p></p>
+  <label for="key">Key to access:</label><br>
+  <input type="text" id="key" name="key"><br><p></p>
+  <label for="dat">Data to input:</label><br>
+  <input type="text" id="dat" name="dat"><br><p></p>
+  <input type="submit">
+</form>
+</div>
+<p>Returned: none </p>
+</center>
+<script>
+  // take the form, change it to json- and submit to / as post
+  var form = document.forms[0];
+  form.addEventListener('submit', (event) => {
+    // handle the form data
+    event.preventDefault();
+    var pswd = form.elements['pswd'];
+    var mod = form.elements['mod'];
+    var row = form.elements['row'];
+    var key = form.elements['key'];
+    var dat = form.elements['dat'];
+    var jsonr = {"pswd":pswd.value,"mod":mod.value,"row":row.value,"key":key.value,"dat":dat.value}
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", "/", true);
+    xmlhttp.setRequestHeader("Content-type", "application/json")
+    xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        alert(xmlhttp.responseText);
+      }
+    };
+    xmlhttp.send(JSON.stringify(jsonr)); 
+  });
+</script>
