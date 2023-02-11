@@ -1,5 +1,5 @@
 # realdb
-easy to use fast and simple database
+real, simple, database
 
 To try out clone the server and run server.py then connect to it from http and you will see this 
 
