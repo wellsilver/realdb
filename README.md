@@ -30,7 +30,7 @@ class real_db:
     
 ```
     
-Its dead simple, the server itself consists of ``POST`` requests to a server, with the modifier "get" "set" or "new"
+Its dead simple, the server itself consists of ``POST`` requests to a server.
 
 ``get``
 
