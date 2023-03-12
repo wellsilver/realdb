@@ -58,8 +58,6 @@ class realdb:
       raise ValueError("Server sent error response "+resp["error"])
     return resp["value"]
 
-import realdb
-
 a=realdb("localhost",4740,"###########")
 print(a.ack())
 a.set("Hello World!","Yes.")
