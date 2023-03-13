@@ -57,9 +57,3 @@ class realdb:
     if resp["error"]!="none":
       raise ValueError("Server sent error response "+resp["error"])
     return resp["value"]
-
-a=realdb("localhost",4740,"###########")
-print(a.ack())
-a.set("Hello World!","Yes.")
-print(a.get("Hello World!"))
-a.close()
