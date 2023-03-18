@@ -3,11 +3,11 @@ real, simple, database
 
 # usage
 
-download server.py and run in location of choosing, it will create a ``data folder`` and a ``settings.json`` with the settings
+download server.py and run in location of choosing, it will create a ``data`` folder and a ``settings.json`` with the settings
 
 To connect the server, download realdb.py and use
 
-realdb.py example: (showcases all functions)
+realdb.py example:
 
 ```python
 import realdb
