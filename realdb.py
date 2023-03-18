@@ -57,7 +57,7 @@ class realdb:
     if resp["error"]!="none":
       raise ValueError("Server sent error response: \""+resp["error"]+"\"")
     return resp["value"]
-  
+
   def tablenew(self,name:str,values:dict) -> None: # rownew("Users",{"id":"int","name":"str","password":"str"})
     global recv
     self.sio.send(json.dumps({"key":self.auth,"type":"row","mod":"new","name":name,"values":values}))
