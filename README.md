@@ -1,7 +1,7 @@
 # realdb
 real, simple, database
 
-## usage
+# usage
 
 download server.py and run in location of choosing, it will create a ``data folder`` and a ``settings.json`` with the settings
 
@@ -14,16 +14,20 @@ import realdb
 
 a=realdb("localhost",4740,"admin") # connect to realdb
 print(a.ack()) # {'error': 'none', 'implementation': 'wellsilver/RealDB py', 'version': 'beta 001', 'alivesince': 1678592736, 'extra': {}}
-a.set("Hello World!","Yes.") # set the key "Hello World!" to "Yes."
-print(a.get("Hello World!")) # get the key "Hello World!" (returns "Yes.":str)
-a.set("Hello World!",50) # set the key "Hello World!" to an integer 50
-print(a.get("Hello World!")) # get the key "Hello WOrld!" (returns 50:int)
+a.keyset("Hello World!","Yes.") # set the key "Hello World!" to "Yes."
+print(a.keyget("Hello World!")) # get the key "Hello World!" (returns "Yes.":str)
+a.keyset("Hello World!",50) # set the key "Hello World!" to an integer 50
+print(a.keyget("Hello World!")) # get the key "Hello WOrld!" (returns 50:int)
 a.close()
 ```
 
-## docs
+# docs
+
+## info
 
 both use socketio, its the only websocket api that worked, but I will change it later.
+
+## keyvalue
 
 ### ack
 
@@ -66,3 +70,32 @@ In the example there is a single key named admin, and in the valuestore there is
 | sent | recieved |
 | ---- | -------- |
 | ``{"key":"admin","type":"keyvalue","mod":"set","name":"Hello World!"}`` | ``{"error":"none","value":"Yes."}`` |
+
+## rows
+
+### new
+
+Create a new table
+
+Primary key size may be limited by host machine, all other keys expand in size infinitely
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"row","mod":"new","name":"Users","values":{"id":"int","name":"str"}}`` | ``{"error":"none"}`` |
+
+### set
+
+Set values in a table
+
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"row","mod":"set","name":"Users","values":values}`` | ``{"error":"none"}`` |
+
+### read
+
+Read all values from table ``<name>`` and row ``<value>``
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"row","mod":"read","name":"Users","value":"5005"}`` | ``{"error":"none","data":{}}`` |
