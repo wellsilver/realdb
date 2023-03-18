@@ -38,28 +38,50 @@ class realdb:
     recv = None
     return resp
 
-  def set(self,name:str,value:any) -> None: # set a key in the valuestore
+  def keyset(self,name:str,value:any) -> None: # set a key in the valuestore
     global recv
     self.sio.send(json.dumps({"key":self.auth,"type":"keyvalue","mod":"set","name":name,"value":value}))
     while recv == None:
       pass
     resp = json.loads(recv)
     if resp["error"]!="none":
-      raise ValueError("Server sent error response "+resp["error"])
+      raise ValueError("Server sent error response: \""+resp["error"]+"\"")
     recv = None
 
-  def get(self,name:str) -> any: # get a key from the valuestore
+  def keyget(self,name:str) -> dict: # get a key from the valuestore
     global recv
     self.sio.send(json.dumps({"key":self.auth,"type":"keyvalue","mod":"get","name":name}))
     while recv == None:
       pass
     resp = json.loads(recv)
     if resp["error"]!="none":
-      raise ValueError("Server sent error response "+resp["error"])
+      raise ValueError("Server sent error response: \""+resp["error"]+"\"")
     return resp["value"]
+  
+  def tablenew(self,name:str,values:dict) -> None: # rownew("Users",{"id":"int","name":"str","password":"str"})
+    global recv
+    self.sio.send(json.dumps({"key":self.auth,"type":"row","mod":"new","name":name,"values":values}))
+    while recv == None:
+      pass
+    resp = json.loads(recv)
+    if resp["error"]!="none":
+      raise ValueError("Server sent error response: \""+resp["error"]+"\"")
 
-a=realdb("localhost",4740,"###########")
-print(a.ack())
-a.set("Hello World!","Yes.")
-print(a.get("Hello World!"))
-a.close()
+  def rowset(self,table:str,values:dict) -> None: # rowset("Users",{"id":5005,"name":"Lucky"})
+    global recv
+    self.sio.send(json.dumps({"key":self.auth,"type":"row","mod":"set","name":table,"values":values}))
+    while recv == None:
+      pass
+    resp = json.loads(recv)
+    if resp["error"]!="none":
+      raise ValueError("Server sent error response: \""+resp["error"]+"\"")
+  
+  def rowread(self,name:str,value) -> dict:
+    global recv
+    self.sio.send(json.dumps({"key":self.auth,"type":"row","mod":"read","name":name,"value":value}))
+    while recv == None:
+      pass
+    resp = json.loads(recv)
+    if resp["error"]!="none":
+      raise ValueError("Server sent error response: \""+resp["error"]+"\"")
+    return resp["data"]
