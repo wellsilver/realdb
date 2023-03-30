@@ -23,10 +23,6 @@ a.close()
 
 # docs
 
-## info
-
-both use socketio, its the only websocket api that worked, but I will change it later.
-
 ## keyvalue
 
 ### ack
