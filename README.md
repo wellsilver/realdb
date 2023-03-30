@@ -41,11 +41,11 @@ in both examples the only key is called "admin"
 
 | sent | recieved |
 | ---- | -------- |
-| ``{"type":"{"type":"verify","key":"Im guessing the key"}`` | ``{'error':"none",'valid':False}`` |
+| ``{"type":"verify","key":"Im guessing the key"}`` | ``{'error':"none",'valid':False}`` |
 
 | sent | recieved |
 | ---- | -------- |
-| ``{"type":"{"type":"verify","key":"admin"}`` | ``{'error':"none",'valid':True}`` |
+| ``{"type":"verify","key":"admin"}`` | ``{'error':"none",'valid':True}`` |
 
 ### set
 
