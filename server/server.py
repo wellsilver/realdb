@@ -1,7 +1,6 @@
 import os
 import time
-import socketio # pip install python-socketio
-import eventlet # pip install eventlet
+import websocket_server
 import json
 import logging
 
@@ -172,11 +171,12 @@ class rows:
       f.close()
     return ret
 
-sio = socketio.Server()
+sio = websocket_server.WebsocketServer(host=settings["Connection"]["Host"],port=settings["Connection"]["Port"])
 
-@sio.on("message")
-def handlemsg(sid:socketio.Client,msg):
-  sio.emit('message',json.dumps((index(json.loads(msg)))))
+@sio.set_fn_message_received
+def handlemsg(cli,srvr,msg):
+  msg=json.dumps((index(json.loads(msg))))
+  sio.send_message(cli,msg)
 
 def index(c:dict): # handle requests self.handler_to_client(handler), self, msg
   if "type" not in c: return {'error':"invalid request"}
@@ -221,5 +221,4 @@ def index(c:dict): # handle requests self.handler_to_client(handler), self, msg
 
   return {'error':"none"}
 
-app = socketio.WSGIApp(sio)
-eventlet.wsgi.server(eventlet.listen((settings["Connection"]["Host"], settings["Connection"]["Port"])), app)
+sio.run_forever()
