@@ -1,45 +1,101 @@
 # realdb
 real, simple, database
 
-To try out clone the server and run server.py then connect to it from http and you will see this 
+# usage
 
-![image](https://user-images.githubusercontent.com/67511181/205740385-a74e9ea9-9966-4a9e-8c96-4e0bea0cefcb.png)
+download server.py and run in location of choosing, it will create a ``data folder`` and a ``settings.json`` with the settings
 
-The default password is ``admin`` you can set this to whatever you like and add more in keys.txt (they are separated by newline)
+To connect the server, download realdb.py and use
 
-### how??
-
-Heres a little class (client.py) in python that connects to it for you
+realdb.py example: (showcases all functions)
 
 ```python
-import requests
+import realdb
 
-class real_db:
-  def __init__(self,connect:str,key:str):
-    self.connect=connect
-    self.key=key
-  # get the data in row/key, returns this https://requests.readthedocs.io/en/latest/user/quickstart/#response-content
-  def get(self,row,key):
-    return requests.post(self.connect,json={"pswd":self.key,"mod":"get","row":row,"key":key})
-  # set the data in row/key to data, returns this https://requests.readthedocs.io/en/latest/user/quickstart/#response-content
-  def set(self,row,key,data):
-    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","row":row,"key":key,"dat":data})
-  # uses the "default" row to make a new row with name as data
-  def new(self,data):
-    return requests.post(self.connect,json={"pswd":self.key,"mod":"set","dat":data})
-    
+a=realdb("localhost",4740,"admin") # connect to realdb
+print(a.ack()) # {'error': 'none', 'implementation': 'wellsilver/RealDB py', 'version': 'beta 001', 'alivesince': 1678592736, 'extra': {}}
+a.keyset("Hello World!","Yes.") # set the key "Hello World!" to "Yes."
+print(a.keyget("Hello World!")) # get the key "Hello World!" (returns "Yes.":str)
+a.keyset("Hello World!",50) # set the key "Hello World!" to an integer 50
+print(a.keyget("Hello World!")) # get the key "Hello World!" (returns 50:int)
+a.close()
 ```
-    
-Its dead simple, the server itself consists of ``POST`` requests to a server, with the modifier "get" "set" or "new"
 
-``get``
+# docs
 
-Get gets the data in ``data/<row>/<key>`` and returns it.
+## info
 
-``set``
+both use socketio, its the only websocket api that worked, but I will change it later.
 
-Set sets the data in ``data/<row>/<key>`` to ``dat`` and returns a success message
+## keyvalue
 
-``new``
+### ack
 
-New makes a new row in the database with the name of ``dat``
+Sends information about the server to the client
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"type":"ack"}`` | ``{'error': 'none', 'implementation': 'wellsilver/RealDB py', 'version': 'beta 001', 'alivesince': 1678592736, 'extra': {}}`` |
+
+### verify
+
+Verifies whether a key is valid or not
+
+in both examples the only key is called "admin"
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"type":"{"type":"verify","key":"Im guessing the key"}`` | ``{'error':"none",'valid':False}`` |
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"type":"{"type":"verify","key":"admin"}`` | ``{'error':"none",'valid':True}`` |
+
+### set
+
+Set avalue in the valuestore to a value
+
+in example there is a single key named "admin"
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"keyvalue","mod":"set","name":"Hello World!","value":"Yes."}`` | ``{"error":"none"}`` |
+
+### get
+
+Get a value from the valuestore
+
+In the example there is a single key named admin, and in the valuestore there is a value named ``Hello World!`` set to ``Yes.``
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"keyvalue","mod":"set","name":"Hello World!"}`` | ``{"error":"none","value":"Yes."}`` |
+
+## rows
+
+### new
+
+Create a new table
+
+Primary key size may be limited by host machine, all other keys expand in size infinitely
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"row","mod":"new","name":"Users","values":{"id":"int","name":"str"}}`` | ``{"error":"none"}`` |
+
+### set
+
+Set values in a table
+
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"row","mod":"set","name":"Users","values":values}`` | ``{"error":"none"}`` |
+
+### read
+
+Read all values from table ``<name>`` and row ``<value>``
+
+| sent | recieved |
+| ---- | -------- |
+| ``{"key":"admin","type":"row","mod":"read","name":"Users","value":"5005"}`` | ``{"error":"none","data":{}}`` |
