@@ -22,6 +22,12 @@ jsondefault___ = """
   "Host":"localhost",
   "Port":4740
 }
+"Servers": {
+  {"Host":"",
+  "Port":0,
+  "style":"1:1"
+  }
+}
 }
 """
 
