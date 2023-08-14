@@ -59,6 +59,9 @@ def safeify(string:str) -> str:
   
   return newstr
 
+def sync():
+  pass
+
 class data:
   def newtable(name:str) -> bool:
     name=safeify(name)
@@ -212,14 +215,20 @@ sio = websocket_server.WebsocketServer(host=settings["Connection"]["Host"],port=
 
 @sio.set_fn_message_received
 def handlemsg(cli,srvr,msg):
-  msg=json.dumps((index(json.loads(msg))))
-  sio.send_message(cli,msg)
+  out = index(json.loads(msg))
+  outj = json.dumps(out)
+
+  if out["error"] != None:
+    sio.send_message(cli,outj)
+  else:
+    sync(out)
+    sio.send_message(cli,outj)
 
 def index(c:dict): # handle requests self.handler_to_client(handler), self, msg
   if "type" not in c: return {'error':"invalid request"}
 
   if c['type'] == "ack": # give some info to client
-    return {'error':"none",'implementation':"wellsilver/RealDB py",'version':"beta 001",'alivesince':startedon,"extra":{}}
+    return {'error':"none",'implementation':"wellsilver/RealDB py",'version':"dev.0",'alivesince':startedon,"extra":{}}
 
   if c['type'] == "verify": # verify password
     if "key" not in c: return {'error':"invalid request"}
