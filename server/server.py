@@ -22,13 +22,10 @@ jsondefault___ = """
 "Connection":{
   "Host":"localhost",
   "Port":4740
-}
-"syncmode":"replicate"
+},
+"syncmode":"replicate",
 "syncwith":{
-  {
-  "Host":"localhost",
-  "Port":4741
-  }
+  "localhost":4741
 }
 }
 """
@@ -150,7 +147,7 @@ class rows:
     name=safeify(name)
 
     try:
-      f=open(f"data/storage rows/{name}/defaults.raw","r")
+      f=open(f"data/storage rows/{name}/defaults","r")
     except FileNotFoundError:
       return {"error":"doesnt exist"}
     r=_rowsparsedefaultsraw(f.read())
@@ -188,7 +185,7 @@ class rows:
   def read(name:str,value):
     name=safeify(name)
     try:
-      f=open(f"data/storage rows/{name}/defaults.raw","r")
+      f=open(f"data/storage rows/{name}/defaults","r")
     except FileNotFoundError:
       return {"error":"doesnt exist"}
     
