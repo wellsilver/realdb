@@ -17,15 +17,17 @@ startedon=int(time.time())
 
 jsondefault___ = """
 {
-"keys":["admin"],
+"keys":["server"],
+"sync":"sync",
 "Connection":{
   "Host":"localhost",
   "Port":4740
 }
-"Servers": {
-  {"Host":"",
-  "Port":0,
-  "style":"1:1"
+"syncmode":"replicate"
+"syncwith":{
+  {
+  "Host":"localhost",
+  "Port":4741
   }
 }
 }
