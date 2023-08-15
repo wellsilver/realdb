@@ -1,7 +1,9 @@
 import os
 import time
 import websocket_server
+from websocket import create_connection
 import json
+from threading import Thread
 import logging
 
 if "data" not in os.listdir(os.getcwd()):
@@ -18,7 +20,7 @@ startedon=int(time.time())
 jsondefault___ = """
 {
 "keys":["server"],
-"sync":"sync",
+"synckey":"sync",
 "Connection":{
   "Host":"localhost",
   "Port":4740
@@ -58,8 +60,39 @@ def safeify(string:str) -> str:
   
   return newstr
 
-def sync():
-  pass
+# co-operate with other realdb server's
+replicatesckts = []
+
+def handleconnectsync(con,fro):
+  msg = con.recv()
+  msgd = json.loads(msg)
+  if "error" not in msgd:
+    msgd["error"] = "couldnt connect"
+  if msgd["error"] == "none":
+    replicatesckts.append((con,msgd["key"]))
+  else:
+    print("Could not sync with "+fro+" because "+msgd["error"])
+  # ^ may be a security issue here idk
+
+if settings["syncmode"] == "replicate":
+  for i in settings["syncwith"]:
+    con = create_connection("ws://"+i+":"+str(settings["syncwith"][i]))
+    con.send(json.dumps({"type":"sync","key":settings["synckey"]}))
+    Thread(target=handleconnectsync,args=(con,i,)).start()
+
+def sync(out:str):
+  print("v. "+out)
+  for i in replicatesckts:
+    print("Sent")
+    out = json.loads(out)
+    out["key"] = i[1]
+    out = json.dumps(out)
+    i[0].send(out)
+
+def newsync(msg:dict,cli):
+  print("Connected to "+str(cli["address"]))
+  if msg["key"] == settings["synckey"]:
+    sio.send_message(cli,json.dumps({"error":"none","key":settings["keys"][0]}))
 
 class data:
   def newtable(name:str) -> bool:
@@ -214,13 +247,17 @@ sio = websocket_server.WebsocketServer(host=settings["Connection"]["Host"],port=
 
 @sio.set_fn_message_received
 def handlemsg(cli,srvr,msg):
-  out = index(json.loads(msg))
+  msgj = json.loads(msg)
+  if msgj["type"] == "sync":
+    newsync(msgj,cli)
+    return
+  out = index(msgj)
   outj = json.dumps(out)
 
-  if out["error"] != None:
+  if out["error"] != "none":
     sio.send_message(cli,outj)
   else:
-    sync(out)
+    sync(msg)
     sio.send_message(cli,outj)
 
 def index(c:dict): # handle requests self.handler_to_client(handler), self, msg
