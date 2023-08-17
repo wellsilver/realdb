@@ -1,7 +1,9 @@
 import os
 import time
 import websocket_server
+from websocket import create_connection
 import json
+from threading import Thread
 import logging
 
 if "data" not in os.listdir(os.getcwd()):
@@ -17,10 +19,15 @@ startedon=int(time.time())
 
 jsondefault___ = """
 {
-"keys":["admin"],
+"keys":["server"],
+"synckey":"sync",
 "Connection":{
   "Host":"localhost",
   "Port":4740
+},
+"syncmode":"replicate",
+"syncwith":{
+  "localhost":4741
 }
 }
 """
@@ -52,6 +59,44 @@ def safeify(string:str) -> str:
       newstr += "_" # replace non normal characters with _
   
   return newstr
+
+# co-operate with other realdb server's
+replicatesckts = []
+
+def handleconnectsync(con,fro):
+  msg = con.recv()
+  msgd = json.loads(msg)
+  if "error" not in msgd:
+    msgd["error"] = "couldnt connect"
+  if msgd["error"] == "none":
+    replicatesckts.append((con,msgd["key"]))
+  else:
+    print("Could not sync with "+fro+" because "+msgd["error"])
+  # ^ may be a security issue here idk
+
+if settings["syncmode"] == "replicate":
+  for i in settings["syncwith"]:
+    try:
+      con = create_connection("ws://"+i+":"+str(settings["syncwith"][i]))
+    except:
+      print("Could not sync with "+i)
+      continue
+    con.send(json.dumps({"type":"sync","key":settings["synckey"]}))
+    Thread(target=handleconnectsync,args=(con,i,)).start()
+
+def sync(out:str):
+  print("v. "+out)
+  for i in replicatesckts:
+    print("Sent")
+    out = json.loads(out)
+    out["key"] = i[1]
+    out = json.dumps(out)
+    i[0].send(out)
+
+def newsync(msg:dict,cli):
+  print("Connected to "+str(cli["address"]))
+  if msg["key"] == settings["synckey"]:
+    sio.send_message(cli,json.dumps({"error":"none","key":settings["keys"][0]}))
 
 class data:
   def newtable(name:str) -> bool:
@@ -139,7 +184,7 @@ class rows:
     name=safeify(name)
 
     try:
-      f=open(f"data/storage rows/{name}/defaults.raw","r")
+      f=open(f"data/storage rows/{name}/defaults","r")
     except FileNotFoundError:
       return {"error":"doesnt exist"}
     r=_rowsparsedefaultsraw(f.read())
@@ -177,7 +222,7 @@ class rows:
   def read(name:str,value):
     name=safeify(name)
     try:
-      f=open(f"data/storage rows/{name}/defaults.raw","r")
+      f=open(f"data/storage rows/{name}/defaults","r")
     except FileNotFoundError:
       return {"error":"doesnt exist"}
     
@@ -206,14 +251,24 @@ sio = websocket_server.WebsocketServer(host=settings["Connection"]["Host"],port=
 
 @sio.set_fn_message_received
 def handlemsg(cli,srvr,msg):
-  msg=json.dumps((index(json.loads(msg))))
-  sio.send_message(cli,msg)
+  msgj = json.loads(msg)
+  if msgj["type"] == "sync":
+    newsync(msgj,cli)
+    return
+  out = index(msgj)
+  outj = json.dumps(out)
+
+  if out["error"] != "none":
+    sio.send_message(cli,outj)
+  else:
+    sync(msg)
+    sio.send_message(cli,outj)
 
 def index(c:dict): # handle requests self.handler_to_client(handler), self, msg
   if "type" not in c: return {'error':"invalid request"}
 
   if c['type'] == "ack": # give some info to client
-    return {'error':"none",'implementation':"wellsilver/RealDB py",'version':"beta 001",'alivesince':startedon,"extra":{}}
+    return {'error':"none",'implementation':"wellsilver/RealDB py",'version':"dev.0",'alivesince':startedon,"extra":{}}
 
   if c['type'] == "verify": # verify password
     if "key" not in c: return {'error':"invalid request"}
@@ -254,4 +309,5 @@ def index(c:dict): # handle requests self.handler_to_client(handler), self, msg
 
   return {'error':"none"}
 
+print(f"start {int(time.time())} at {settings['Connection']}")
 sio.run_forever()
