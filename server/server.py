@@ -76,7 +76,11 @@ def handleconnectsync(con,fro):
 
 if settings["syncmode"] == "replicate":
   for i in settings["syncwith"]:
-    con = create_connection("ws://"+i+":"+str(settings["syncwith"][i]))
+    try:
+      con = create_connection("ws://"+i+":"+str(settings["syncwith"][i]))
+    except:
+      print("Could not sync with "+i)
+      continue
     con.send(json.dumps({"type":"sync","key":settings["synckey"]}))
     Thread(target=handleconnectsync,args=(con,i,)).start()
 
@@ -305,4 +309,5 @@ def index(c:dict): # handle requests self.handler_to_client(handler), self, msg
 
   return {'error':"none"}
 
+print(f"start {int(time.time())} at {settings['Connection']}")
 sio.run_forever()
